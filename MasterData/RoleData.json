@@ -1,0 +1,14 @@
+[
+    {
+        "value":"S",
+        "caption":"Intermediary"
+    },
+    {
+        "value":"A",
+        "caption":"Administrator"
+    },
+    {
+        "value":"SU",
+        "caption":"Supervisor"
+    }
+]
