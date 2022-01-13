@@ -1,6 +1,6 @@
 using System;
 
-namespace ReactWindowsAuth
+namespace MsoRegistrationApi
 {
 	public class WeatherForecast
 	{

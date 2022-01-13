@@ -1,8 +1,8 @@
 using System; 
-using ReactWindowsAuth.Interfaces;   
+using MsoRegistrationApi.Interfaces;   
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace ReactWindowsAuth.Models;
+namespace MsoRegistrationApi.Models;
 public class RegistrationDetails : IBaseInterface
 {
 

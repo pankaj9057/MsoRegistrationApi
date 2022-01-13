@@ -1,0 +1,18 @@
+[
+    {
+        "FcaNumber":"FCA0001",
+        "IsValid":true
+    },
+    {
+        "FcaNumber":"FCA0002",
+        "IsValid":false
+    },
+    {
+        "FcaNumber":"FCA0003",
+        "IsValid":true
+    },
+    {
+        "FcaNumber":"FCA0004",
+        "IsValid":true
+    }
+]

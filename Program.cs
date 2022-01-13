@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using NLog.Web;
-
-namespace ReactWindowsAuth
+using System.Net;
+using System;
+namespace MsoRegistrationApi
 {
 	public class Program
 	{
@@ -15,6 +16,10 @@ namespace ReactWindowsAuth
 			Host.CreateDefaultBuilder(args)
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
+					//  webBuilder.ConfigureKestrel(serverOptions =>
+                    // {
+                    //     serverOptions.Listen(IPAddress.Any, Convert.ToInt32(Environment.GetEnvironmentVariable("PORT")));
+                    // }).UseStartup<Startup>();
 					webBuilder.UseStartup<Startup>();
 				})
 				.ConfigureLogging((ctx, lb) =>

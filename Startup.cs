@@ -1,21 +1,22 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.OpenApi.Models;
 using DatabaseSettings;
-using ReactWindowsAuth.Services; 
-using ReactWindowsAuth.Models;
+using MsoRegistrationApi.Services; 
+using MsoRegistrationApi.Models;
 using Microsoft.Extensions.Options;
+using MsoRegistrationApi.Middleware;
 
-namespace ReactWindowsAuth
+namespace MsoRegistrationApi
 {
 	public class Constants
 	{
 		public const string CORS_ORIGINS = "CorsOrigins";
+		public const string CORS_HEADERS="AllowedHeaders";
 		public const string DatabaseSetting_Section ="MsoRegistrationDatabase";
 	}
 
@@ -31,30 +32,21 @@ namespace ReactWindowsAuth
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			// https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-3.1&tabs=visual-studio
-			services.AddAuthentication(NegotiateDefaults.AuthenticationScheme).AddNegotiate();
-			services.AddAuthorization(options =>
-			{
-				// By default, all incoming requests will be authorized according to the default policy.
-				options.FallbackPolicy = options.DefaultPolicy;
-			});
-			//services.AddAuthentication(Microsoft.AspNetCore.Server.IISIntegration.IISDefaults.AuthenticationScheme);
+		    //services.AddAuthentication(Microsoft.AspNetCore.Server.IISIntegration.IISDefaults.AuthenticationScheme);
 			 services.AddSwaggerGen(c => {
 									c.SwaggerDoc("v1", new OpenApiInfo {
-										Title = "SwaggerDemoApplication", Version = "v1"
+										Title = "MsoRegistration Api", Version = "v1"
 									});
 								});
 			services.AddControllers();
 			services.AddCors(opt =>
 			{
-				opt.AddPolicy("CorsPolicy", builder => builder
-					.AllowAnyHeader()
+				opt.AddPolicy(Constants.CORS_ORIGINS, builder => builder
+					.WithHeaders(Configuration.GetSection(Constants.CORS_HEADERS).Get<string[]>())
 					.AllowAnyMethod()
 					.WithOrigins(Configuration.GetSection(Constants.CORS_ORIGINS).Get<string[]>())
 					.AllowCredentials());
 			});
-
-			services.AddTransient<Microsoft.AspNetCore.Authentication.IClaimsTransformation, ClaimsTransformer>();
 			services.Configure<DatabaseSetting>(Configuration.GetSection(Constants.DatabaseSetting_Section));
 			services.AddApiVersioning(
                 options =>
@@ -82,6 +74,8 @@ namespace ReactWindowsAuth
 			(
 				services.BuildServiceProvider().GetService<IOptions<DatabaseSetting>>(),"Brand"
 			));
+			services.AddHealthChecks()
+			.AddMongoDb(Configuration.GetSection(Constants.DatabaseSetting_Section)["ConnectionString"]);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,18 +87,21 @@ namespace ReactWindowsAuth
 			}
 
 			app.UseHttpsRedirection();
-
-			app.UseRouting();
-			app.UseCors("CorsPolicy");
-			app.UseAuthentication();
-			app.UseAuthorization();
+			// app.UseCors((configurePolicy)=> configurePolicy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000","https://pankaj9057.github.io")
+			// .WithHeaders("Content-Type","Accept","ApiKey"));
+			if (env.IsProduction())
+			{
+				app.UseMiddleware<ApiKeyMiddleware>();
+			}
+			app.UseRouting();		
 			app.UseSwagger();
        		app.UseSwaggerUI(c => {
-							c.SwaggerEndpoint("/swagger/v1/swagger.json", "SwaggerDemoApplication V1");
+							c.SwaggerEndpoint("/swagger/v1/swagger.json", "MsoRegistration Api");
 							});
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.MapHealthChecks("/healthcheck");
 			});
 		}
 	}
